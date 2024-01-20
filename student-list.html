@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>replit</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+
+<body>
+  <header>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
+        <h1 class="navbar-brand">Student Management</h1>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+          <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="#studentList">Student
+                List</a>
+            </li>
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="new-student.html">Add
+                Student</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>Student List</h1>
+
+    <label>Filter by Gender:</label>
+    <select class="form-control" id="filterByGender">
+      <option value="All">All</option>
+      <option value="Female">Female</option>
+      <option value="Male">Male</option>
+      <option value="Others">Others</option>
+    </select>
+
+    <div class="my-4" id="successMessage"></div>
+
+    <ul id="studentList" class="list-group m-3"></ul>
+
+  </main>
+
+  <script>
+    const studentList = document.querySelector('#studentList')
+    const API_URL = 'https://student-management-Student-neog.replit.app/students'
+    const successMessage = document.querySelector("#successMessage")
+    const filterByGender = document.querySelector("#filterByGender");
+
+
+    function listComponent(data) {
+      studentList.innerHTML = " "
+      console.log(data)
+
+      for (let i = 0; i < data.length; i++) {
+        const listElement = document.createElement('li')
+
+        listElement.className = 'list-group-item py-2'
+
+        listElement.innerHTML = `${data[i].name} - Grade: ${data[i].grade} - Age: ${data[i].age} - Attendence: ${data[i].attendence} - Gender: ${data[i].gender} - Marks: ${data[i].marks}<button class="btn btn-danger float-end" data-id="${data[i]._id}" id="deleteBtn">DELETE</button>`
+        studentList.appendChild(listElement)
+      }
+    }
+
+    function setDeleteBtn() {
+
+      const allDeleteBtn = document.querySelectorAll("#deleteBtn")
+      for (let i = 0; i < allDeleteBtn.length; i++) {
+        allDeleteBtn[i].addEventListener("click", function (event) {
+          const studentId = event.target.getAttribute('data-id')
+          fetch(`${API_URL}/${studentId}`, {
+            method: "DELETE"
+          })
+            .then(function (response) {
+              return response.json()
+            })
+            .then(function (data) {
+              fetchData()
+            })
+        })
+      }
+    }
+
+
+    function fetchData() {
+      studentList.innerHTML = " "
+      fetch(API_URL)
+        .then(function (response) {
+          return response.json()
+        })
+        .then(function (data) {
+          if (data) {
+            listComponent(data)
+          }
+          setDeleteBtn()
+          filterByGender.addEventListener('change', function () {
+            const selectedGender = filterByGender.value
+            const filteredData = []
+            if (selectedGender !== "All") {
+              for (let i = 0; i < data.length; i++) {
+                if (data[i].gender === selectedGender) {
+                  filteredData.push(data[i])
+                }
+              }
+              listComponent(filteredData)
+            } else {
+              fetchData()
+            }
+
+          })
+        })
+    }
+
+    fetchData()
+
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+
+</body>
+
+</html>
